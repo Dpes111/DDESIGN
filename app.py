@@ -19,7 +19,7 @@ from werkzeug.utils import secure_filename
 # App configuration
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
-app.secret_key = "3dprint-secret-key-change-in-production"
+app.secret_key = os.environ.get("SECRET_KEY", "3dprint-secret-key-change-in-production")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, "database.db")
@@ -684,8 +684,9 @@ def uploaded_stl(filename):
 
 
 # ---------------------------------------------------------------------------
-# Run
+# Initialize DB (runs on startup whether gunicorn or direct)
 # ---------------------------------------------------------------------------
+init_db()
+
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True, port=5000)
