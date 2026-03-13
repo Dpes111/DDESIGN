@@ -1,0 +1,79 @@
+{% extends "admin_base.html" %}
+{% block title %}Orders - Admin{% endblock %}
+{% block page_title %}Customer Orders{% endblock %}
+
+{% block content %}
+
+<!-- Status filter tabs -->
+<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+  {% for label, val in [('All',''),('Pending','Pending'),('Payment Received','Payment Received'),('Processing','Processing'),('Completed','Completed'),('Cancelled','Cancelled')] %}
+  <a href="{{ url_for('admin_orders', status=val) }}"
+     class="filter-btn {% if status_filter == val %}active{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+<div class="admin-table-wrap">
+  <div class="admin-table-header">
+    <h3>
+      {% if status_filter %}{{ status_filter }}{% else %}All{% endif %} Orders
+      ({{ orders|length }})
+    </h3>
+  </div>
+
+  {% if orders %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Customer</th>
+        <th>Phone</th>
+        <th>Total</th>
+        <th>Payment</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td><strong style="font-family:monospace;">{{ order['order_code'] }}</strong></td>
+        <td>
+          <div style="font-weight:600;">{{ order['customer_name'] }}</div>
+          <div style="font-size:12px;color:var(--text-muted);">{{ order['email'] }}</div>
+        </td>
+        <td style="color:var(--text-muted);">{{ order['phone'] }}</td>
+        <td><strong>Rs. {{ "%.2f"|format(order['total_price']) }}</strong></td>
+        <td>
+          {% if order['payment_screenshot'] %}
+            <a href="{{ url_for('uploaded_payment', filename=order['payment_screenshot']) }}"
+               target="_blank" class="btn btn-secondary btn-sm">📸 View</a>
+          {% else %}
+            <span style="color:var(--text-muted);font-size:13px;">None</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="badge badge-{{ order['status']|lower|replace(' ','_') }}">{{ order['status'] }}</span>
+        </td>
+        <td style="color:var(--text-muted);font-size:13px;">
+          {{ order['created_at'].strftime('%Y-%m-%d') if order['created_at'] else 'N/A' }}
+        </td>
+        <td>
+          <a href="{{ url_for('admin_order_detail', order_id=order['id']) }}"
+             class="btn btn-secondary btn-sm">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="padding:60px;text-align:center;color:var(--text-muted);">
+    <div style="font-size:3rem;margin-bottom:12px;">🛒</div>
+    No orders found.
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

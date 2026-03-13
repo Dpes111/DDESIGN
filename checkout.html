@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Checkout - PrintCraft 3D{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ url_for('index') }}">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="{{ url_for('cart') }}">Cart</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Checkout</span>
+    </div>
+    <h1>Checkout</h1>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:80px;">
+  <form action="{{ url_for('checkout') }}" method="POST" enctype="multipart/form-data">
+
+    <div class="checkout-layout">
+
+      <!-- Left -->
+      <div>
+
+        <!-- Step 1: Customer -->
+        <div class="checkout-card">
+          <div class="checkout-card-title">
+            <span class="step-num">1</span> Customer Information
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Full Name <span class="required">*</span></label>
+              <input type="text" name="name" class="form-control" placeholder="Aarav Shrestha" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number <span class="required">*</span></label>
+              <input type="tel" name="phone" class="form-control" placeholder="98XXXXXXXX" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address <span class="required">optional</span></label>
+            <input type="email" name="email" class="form-control" placeholder="you@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Delivery Address <span class="required">*</span></label>
+            <textarea name="address" class="form-control" placeholder="Street, City, Province, Postal Code" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Order Notes (Optional)</label>
+            <textarea name="notes" class="form-control" placeholder="Color preference, special instructions, etc." style="min-height:70px;"></textarea>
+          </div>
+        </div>
+
+        <!-- Step 2: Delivery -->
+        <div class="checkout-card">
+          <div class="checkout-card-title">
+            <span class="step-num">2</span> Delivery Method
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            {% for label, charge in delivery_options %}
+            <label class="delivery-option-label" style="display:flex;align-items:center;justify-content:space-between;
+                          padding:14px 18px;border:2px solid var(--border);border-radius:var(--radius-sm);
+                          cursor:pointer;transition:all 0.2s;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <input type="radio" name="delivery_method" value="{{ label }}"
+                       {% if loop.first %}checked{% endif %}
+                       style="accent-color:var(--accent);width:16px;height:16px;"
+                       onchange="updateDelivery(this)">
+                <div>
+                  <div style="font-weight:600;font-size:14px;">{{ label.split('(')[0].strip() }}</div>
+                  <div style="font-size:12px;color:var(--text-muted);">
+                    {% if 'Inside Valley' in label %}Kathmandu, Lalitpur, Bhaktapur
+                    {% elif 'Outside Valley' in label %}All other districts
+                    {% elif 'Same Day' in label %}Order before 10 AM – KTM only
+                    {% elif 'Express' in label %}Priority + fast courier nationwide
+                    {% elif 'Pickup' in label %}Collect from our workshop
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <span style="font-weight:700;font-size:15px;color:{% if charge == 0 %}var(--success){% else %}var(--accent){% endif %};">
+                {% if charge == 0 %}FREE{% else %}Rs. {{ charge }}{% endif %}
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Step 3: Payment -->
+        <div class="checkout-card">
+          <div class="checkout-card-title">
+            <span class="step-num">3</span> Payment via QR Code
+          </div>
+          <div class="qr-box">
+            <div class="qr-placeholder"><span>📱</span></div>
+            <div class="qr-instruction">
+              <strong>Scan to Pay</strong><br>
+              Use eSewa, Khalti, or your bank's app to scan this QR code.<br>
+              Amount to pay: <strong style="color:var(--accent);" id="qr-amount">Rs. {{ "%.2f"|format(subtotal) }}</strong>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;">
+              {% for m in ['eSewa','Khalti','Bank QR'] %}
+              <div style="background:white;border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 14px;font-size:13px;font-weight:600;">{{ m }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          <div style="background:var(--warning-light);border:1px solid #fcd34d;border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:20px;font-size:14px;color:var(--warning);">
+            ⚠️ Complete payment first, then upload your screenshot. Order is processed after admin verifies payment.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Upload Payment Screenshot <span class="required">*</span></label>
+            <div class="file-upload">
+              <input type="file" name="payment_screenshot" accept="image/*" required>
+              <div class="file-upload-icon">📸</div>
+              <div class="file-upload-text">Click or drag to upload screenshot</div>
+              <div class="file-upload-hint">PNG, JPG, JPEG or GIF</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Summary -->
+      <div>
+        <div class="cart-summary" style="position:sticky;top:88px;">
+          <h3 style="margin-bottom:20px;">Order Summary</h3>
+          {% for item in items %}
+          <div class="summary-row">
+            <span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+              {{ item['name'] }} × {{ item['quantity'] }}
+            </span>
+            <span>Rs. {{ "%.2f"|format(item['subtotal']) }}</span>
+          </div>
+          {% endfor %}
+          <div class="summary-row">
+            <span style="color:var(--text-muted);">Subtotal</span>
+            <span>Rs. {{ "%.2f"|format(subtotal) }}</span>
+          </div>
+          <div class="summary-row">
+            <span style="color:var(--text-muted);">Delivery</span>
+            <span id="delivery-display" style="color:var(--success);font-weight:600;">Free</span>
+          </div>
+          <div class="summary-total">
+            <span>Total</span>
+            <span style="color:var(--accent);" id="total-display">Rs. {{ "%.2f"|format(subtotal) }}</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:20px;">
+            ✅ Place Order
+          </button>
+          <p style="font-size:12px;text-align:center;margin-top:12px;color:var(--text-muted);">
+            By placing this order you agree to our terms.
+          </p>
+          <a href="{{ url_for('cart') }}" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:var(--text-muted);">
+            ← Back to Cart
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const DELIVERY = { {% for label, charge in delivery_options %}"{{ label }}": {{ charge }},{% endfor %} };
+const SUBTOTAL = {{ subtotal }};
+
+function updateDelivery(radio) {
+  const charge = DELIVERY[radio.value] || 0;
+  const total = SUBTOTAL + charge;
+  document.getElementById('delivery-display').textContent = charge === 0 ? 'Free' : 'Rs. ' + charge;
+  document.getElementById('delivery-display').style.color = charge === 0 ? 'var(--success)' : 'var(--text-primary)';
+  document.getElementById('total-display').textContent = 'Rs. ' + total.toFixed(2);
+  document.getElementById('qr-amount').textContent = 'Rs. ' + total.toFixed(2);
+  // Highlight selection
+  document.querySelectorAll('.delivery-option-label').forEach(l => {
+    l.style.borderColor = 'var(--border)'; l.style.background = 'white';
+  });
+  radio.closest('.delivery-option-label').style.borderColor = 'var(--accent)';
+  radio.closest('.delivery-option-label').style.background = 'var(--accent-light)';
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded', () => {
+  const checked = document.querySelector('input[name="delivery_method"]:checked');
+  if (checked) updateDelivery(checked);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "admin_base.html" %}
+{% block title %}Dashboard - Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-card-icon blue">🛒</div>
+    <div class="stat-card-body">
+      <div class="stat-card-value">{{ total_orders }}</div>
+      <div class="stat-card-label">Total Orders</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-icon orange">⏳</div>
+    <div class="stat-card-body">
+      <div class="stat-card-value">{{ pending_orders }}</div>
+      <div class="stat-card-label">Pending Orders</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-icon green">💰</div>
+    <div class="stat-card-body">
+      <div class="stat-card-value">Rs. {{ revenue }}</div>
+      <div class="stat-card-label">Revenue (Completed)</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-card-icon purple">📦</div>
+    <div class="stat-card-body">
+      <div class="stat-card-value">{{ total_products }}</div>
+      <div class="stat-card-label">Products</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap;">
+  <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary">
+    ➕ Add Product
+  </a>
+  <a href="{{ url_for('admin_orders') }}" class="btn btn-secondary">
+    🛒 View Orders
+  </a>
+  <a href="{{ url_for('admin_custom_requests') }}" class="btn btn-secondary">
+    ✏️ Custom Requests
+    {% if custom_requests > 0 %}
+      <span class="admin-nav-badge">{{ custom_requests }}</span>
+    {% endif %}
+  </a>
+</div>
+
+<!-- Recent Orders -->
+<div class="admin-table-wrap">
+  <div class="admin-table-header">
+    <h3>Recent Orders</h3>
+    <a href="{{ url_for('admin_orders') }}" class="btn btn-secondary btn-sm">View All</a>
+  </div>
+  {% if recent_orders %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Customer</th>
+        <th>Email</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in recent_orders %}
+      <tr>
+        <td><strong style="font-family:monospace;font-size:13px;">{{ order['order_code'] }}</strong></td>
+        <td>{{ order['customer_name'] }}</td>
+        <td style="color:var(--text-muted);">{{ order['email'] }}</td>
+        <td><strong>Rs. {{ "%.2f"|format(order['total_price']) }}</strong></td>
+        <td>
+          <span class="badge badge-{{ order['status']|lower|replace(' ','_') }}">{{ order['status'] }}</span>
+        </td>
+        <td style="color:var(--text-muted);font-size:13px;">
+          {{ order['created_at'].strftime('%Y-%m-%d') if order['created_at'] else 'N/A' }}
+        </td>
+        <td>
+          <a href="{{ url_for('admin_order_detail', order_id=order['id']) }}"
+             class="btn btn-secondary btn-sm">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="padding:40px;text-align:center;color:var(--text-muted);">
+    No orders yet.
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

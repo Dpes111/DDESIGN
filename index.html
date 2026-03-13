@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}PrintCraft 3D - Turn Ideas Into Reality{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge fade-up">
+        🚀 Nepal's Premier 3D Printing Service
+      </div>
+      <h1 class="hero-title fade-up delay-1">
+        Turn Your <span>Ideas Into</span><br>Reality with 3D Printing
+      </h1>
+      <p class="hero-desc fade-up delay-2">
+        From custom name signs to functional parts — we bring your designs to life with precision FDM and resin printing. Fast turnaround, premium quality, affordable prices.
+      </p>
+      <div class="hero-actions fade-up delay-3">
+        <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">
+          🛍️ Shop Now
+        </a>
+        <a href="{{ url_for('custom_print') }}" class="btn btn-secondary btn-lg">
+          ✏️ Custom Order
+        </a>
+      </div>
+      <div class="hero-stats fade-up delay-4">
+        <div class="stat-item">
+          <div class="stat-num">500+</div>
+          <div class="stat-label">Happy Customers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">1200+</div>
+          <div class="stat-label">Items Printed</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">48h</div>
+          <div class="stat-label">Avg. Delivery</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-img-card">🏷️</div>
+      <div class="hero-img-card">🗝️</div>
+      <div class="hero-img-card">🗼</div>
+      <div class="hero-img-card">📱</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Categories ── -->
+<section class="section" style="background: var(--white);">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Browse By Category</div>
+      <h2 class="section-title">Find What You Need</h2>
+      <p class="section-desc">Explore our wide range of 3D printed products, from decorative to functional.</p>
+    </div>
+
+    <div class="categories-grid">
+      {% set cat_data = [
+        ('Name Signs', '🏷️', 'Personalized signs for home & office'),
+        ('Keychains', '🗝️', 'Custom & novelty keychains'),
+        ('Decorative Models', '🗼', 'Ornaments, figurines & more'),
+        ('Functional Products', '🔧', 'Practical everyday items')
+      ] %}
+      {% for cat, icon, desc in cat_data %}
+      <a href="{{ url_for('products', category=cat) }}" class="category-card">
+        <span class="category-icon">{{ icon }}</span>
+        <div class="category-name">{{ cat }}</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px;">{{ desc }}</p>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured Products ── -->
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Featured Products</div>
+      <h2 class="section-title">Popular Picks</h2>
+      <p class="section-desc">Handpicked bestsellers from our collection — quality you can touch.</p>
+    </div>
+
+    <div class="products-grid">
+      {% for product in featured %}
+      {% include 'partials/product_card.html' %}
+      {% endfor %}
+    </div>
+
+    <div style="text-align:center; margin-top: 40px;">
+      <a href="{{ url_for('products') }}" class="btn btn-secondary btn-lg">
+        View All Products →
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Why Us ── -->
+<section class="section" style="background: var(--white);">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Why D Design</div>
+      <h2 class="section-title">Quality You Can Count On</h2>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px;">
+      {% for icon, title, desc in [
+        ('⚡','Fast Turnaround','Most orders completed within 48 hours.'),
+        ('🎨','Custom Designs','Upload your own STL/OBJ files.'),
+        ('💎','Premium Materials','PLA, PETG, ABS, and Resin options.'),
+        ('🚚','Nationwide Delivery','Shipping across Nepal via Daraz / courier.')
+      ] %}
+      <div class="category-card" style="cursor:default;">
+        <span class="category-icon">{{ icon }}</span>
+        <div class="category-name">{{ title }}</div>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px;">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA Banner ── -->
+<section style="background:linear-gradient(135deg,var(--accent),var(--accent-hover));padding:64px 0;">
+  <div class="container" style="text-align:center;">
+    <h2 style="color:white;margin-bottom:12px;">Have a Custom Design in Mind?</h2>
+    <p style="color:rgba(255,255,255,.8);margin-bottom:28px;font-size:16px;">Upload your STL or OBJ file and we'll print it for you!</p>
+    <a href="{{ url_for('custom_print') }}" class="btn btn-lg" style="background:white;color:var(--accent);font-weight:700;">
+      🖨️ Start Custom Order
+    </a>
+  </div>
+</section>
+
+{% endblock %}

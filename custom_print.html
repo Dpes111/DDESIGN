@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Custom 3D Print - PrintCraft 3D{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ url_for('index') }}">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Custom Print</span>
+    </div>
+    <h1>Custom 3D Print Order</h1>
+    <p>Upload your design and we'll bring it to life.</p>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:80px;max-width:860px;">
+
+  <!-- Banner -->
+  <div class="custom-print-hero">
+    <div class="custom-print-hero-icon">🖨️</div>
+    <div>
+      <h2 style="margin-bottom:8px;">Have a design file?</h2>
+      <p style="font-size:15px;line-height:1.7;">Upload your STL or OBJ file and describe your requirements. We support FDM printing in PLA, PETG, and ABS in multiple colors. Typical turnaround: <strong>48–72 hours</strong>.</p>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="custom-print-card">
+    <form action="{{ url_for('custom_print') }}" method="POST" enctype="multipart/form-data">
+
+      <h3 style="margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+        📋 Request Details
+      </h3>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Your Name <span class="required">*</span></label>
+          <input type="text" name="name" class="form-control" placeholder="Full Name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" name="phone" class="form-control" placeholder="98XXXXXXXX">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address <span class="required">*</span></label>
+        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description / Special Instructions <span class="required">*</span></label>
+        <textarea name="description" class="form-control" rows="4"
+          placeholder="Describe what you want printed — size, color, material preference, purpose, etc." required></textarea>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Size</label>
+          <select name="size" class="form-control">
+            <option value="">Select size…</option>
+            <option value="Small (< 10cm)">Small (less than 10cm)</option>
+            <option value="Medium (10–20cm)">Medium (10–20cm)</option>
+            <option value="Large (20–30cm)">Large (20–30cm)</option>
+            <option value="Extra Large (30cm+)">Extra Large (30cm+)</option>
+            <option value="Custom">Custom (specify in description)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input type="number" name="quantity" class="form-control" value="1" min="1" max="100">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Upload Design File (STL / OBJ)</label>
+        <div class="file-upload">
+          <input type="file" name="stl_file" accept=".stl,.obj">
+          <div class="file-upload-icon">📁</div>
+          <div class="file-upload-text">Click or drag your file here</div>
+          <div class="file-upload-hint">Supports .STL and .OBJ files (max 50MB)</div>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:8px;">
+          Don't have a file? No problem — describe what you want in the field above and we'll design it for you.
+        </p>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:8px;">
+        <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">
+          🚀 Submit Request
+        </button>
+        <a href="{{ url_for('products') }}" class="btn btn-secondary btn-lg">
+          Browse Products
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- FAQ -->
+  <div style="margin-top:48px;">
+    <h2 style="margin-bottom:24px;">Frequently Asked Questions</h2>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      {% for q, a in [
+        ('What file formats do you accept?', 'We accept .STL and .OBJ files — the most common 3D printing formats. If you have a different format, email us and we\'ll help.'),
+        ('How long does custom printing take?', 'Most custom prints are ready within 48–72 hours depending on complexity and size. We\'ll confirm the timeline after reviewing your request.'),
+        ('How do I pay for a custom order?', 'After we review your request, we\'ll send you a price quote via email. Payment can be made via eSewa, Khalti, or bank transfer.'),
+        ('Can I request specific colors?', 'Yes! We have a wide range of filament colors. Just mention your preference in the description field.')
+      ] %}
+      <details style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;">
+        <summary style="font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+          {{ q }} <span>▾</span>
+        </summary>
+        <p style="margin-top:10px;font-size:14px;line-height:1.6;">{{ a }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

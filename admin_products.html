@@ -1,0 +1,80 @@
+{% extends "admin_base.html" %}
+{% block title %}Products - Admin{% endblock %}
+{% block page_title %}Manage Products{% endblock %}
+
+{% block content %}
+
+<div class="admin-table-wrap">
+  <div class="admin-table-header">
+    <h3>All Products ({{ products|length }})</h3>
+    <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary btn-sm">➕ Add Product</a>
+  </div>
+
+  {% if products %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Price</th>
+        <th>Stock</th>
+        <th>Added</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for product in products %}
+      <tr>
+        <td style="color:var(--text-muted);">{{ product['id'] }}</td>
+        <td>
+          <strong>{{ product['name'] }}</strong>
+          <div style="font-size:12px;color:var(--text-muted);max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ product['description'] }}
+          </div>
+        </td>
+        <td>
+          <span class="badge" style="background:var(--accent-light);color:var(--accent);">
+            {{ product['category'] }}
+          </span>
+        </td>
+        <td><strong>Rs. {{ "%.2f"|format(product['price']) }}</strong></td>
+        <td>
+          {% if product['stock'] > 5 %}
+            <span style="color:var(--success);font-weight:600;">{{ product['stock'] }}</span>
+          {% elif product['stock'] > 0 %}
+            <span style="color:var(--warning);font-weight:600;">{{ product['stock'] }}</span>
+          {% else %}
+            <span style="color:var(--danger);font-weight:600;">0</span>
+          {% endif %}
+        </td>
+        <td style="color:var(--text-muted);font-size:13px;">
+          {{ product['created_at'].strftime('%Y-%m-%d') if product['created_at'] else 'N/A' }}
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <a href="{{ url_for('admin_edit_product', product_id=product['id']) }}"
+               class="btn btn-secondary btn-sm">✏️ Edit</a>
+            <form action="{{ url_for('admin_delete_product', product_id=product['id']) }}"
+                  method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-danger btn-sm"
+                      data-confirm="Delete '{{ product['name'] }}'? This cannot be undone.">
+                🗑️
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="padding:60px;text-align:center;">
+    <div style="font-size:3rem;margin-bottom:12px;">📦</div>
+    <h3>No products yet</h3>
+    <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary mt-4">Add First Product</a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

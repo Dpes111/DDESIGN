@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}{{ product['name'] }} - PrintCraft 3D{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ url_for('index') }}">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="{{ url_for('products') }}">Products</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="{{ url_for('products', category=product['category']) }}">{{ product['category'] }}</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>{{ product['name'] }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:80px;">
+  <div class="product-detail-grid">
+
+    <!-- Image -->
+    <div>
+      <div class="product-detail-img">
+        {% set emoji_map = {'Name Signs':'🏷️','Keychains':'🗝️','Decorative Models':'🗼','Functional Products':'🔧'} %}
+        {% if product['image'] and product['image'] != 'default.png' %}
+          <img src="{{ url_for('static', filename='images/products/' + product['image']) }}"
+               alt="{{ product['name'] }}"
+               onerror="this.outerHTML='<span style=font-size:6rem>{{ emoji_map.get(product['category'],'🖨️') }}</span>'">
+        {% else %}
+          <span style="font-size:6rem;">{{ emoji_map.get(product['category'], '🖨️') }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div>
+      <span class="product-detail-category">{{ product['category'] }}</span>
+      <h1 class="product-detail-title">{{ product['name'] }}</h1>
+      <div class="product-detail-price">Rs. {{ "%.2f"|format(product['price']) }}</div>
+      <p class="product-detail-desc">{{ product['description'] }}</p>
+
+      <!-- Stock indicator -->
+      {% if product['stock'] > 5 %}
+        <p style="color:var(--success);font-weight:600;font-size:14px;margin-bottom:20px;">
+          ✅ In Stock ({{ product['stock'] }} available)
+        </p>
+      {% elif product['stock'] > 0 %}
+        <p style="color:var(--warning);font-weight:600;font-size:14px;margin-bottom:20px;">
+          ⚠️ Low Stock ({{ product['stock'] }} left)
+        </p>
+      {% else %}
+        <p style="color:var(--danger);font-weight:600;font-size:14px;margin-bottom:20px;">
+          ❌ Out of Stock
+        </p>
+      {% endif %}
+
+      <!-- Add to Cart Form -->
+      {% if product['stock'] > 0 %}
+      <form action="{{ url_for('add_to_cart', product_id=product['id']) }}" method="POST">
+        <label class="form-label">Quantity</label>
+        <div class="qty-selector" style="margin-bottom:20px;">
+          <button type="button" class="qty-btn" data-action="minus">−</button>
+          <input type="number" name="quantity" value="1" min="1" max="{{ product['stock'] }}" class="qty-input">
+          <button type="button" class="qty-btn" data-action="plus">+</button>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">
+            🛒 Add to Cart
+          </button>
+          <a href="{{ url_for('cart') }}" class="btn btn-secondary btn-lg">View Cart</a>
+        </div>
+      </form>
+      {% else %}
+      <button class="btn btn-secondary btn-lg" disabled style="opacity:.5;cursor:not-allowed;">
+        Out of Stock
+      </button>
+      {% endif %}
+
+      <!-- Meta info -->
+      <div style="margin-top:32px;padding:20px;background:var(--bg);border-radius:var(--radius-sm);">
+        <div style="display:flex;gap:24px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Material</div>
+            <div style="font-weight:600;font-size:14px;margin-top:2px;">PLA / PETG</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Lead Time</div>
+            <div style="font-weight:600;font-size:14px;margin-top:2px;">24–48 hours</div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Colors</div>
+            <div style="font-weight:600;font-size:14px;margin-top:2px;">Multiple Available</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related %}
+  <div style="margin-top:64px;">
+    <div class="section-header" style="text-align:left;margin-bottom:28px;">
+      <h2>Related Products</h2>
+    </div>
+    <div class="products-grid">
+      {% for product in related %}
+      {% include 'partials/product_card.html' %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

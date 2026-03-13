@@ -1,0 +1,135 @@
+{% extends "admin_base.html" %}
+{% block title %}Order {{ order['order_code'] }} - Admin{% endblock %}
+{% block page_title %}Order {{ order['order_code'] }}{% endblock %}
+
+{% block content %}
+
+<!-- Print Button -->
+<div style="display:flex;justify-content:flex-end;margin-bottom:20px;" class="no-print">
+  <a href="{{ url_for('admin_print_receipt', order_id=order['id']) }}" target="_blank" class="btn btn-primary">
+    🖨️ Print Receipt
+  </a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
+
+  <!-- Left: Order Details -->
+  <div>
+    <div class="admin-table-wrap" style="padding:24px 28px;margin-bottom:20px;">
+      <h3 style="margin-bottom:20px;">Customer Information</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        {% for label, val in [
+          ('Order Code', order['order_code']),
+          ('Name', order['customer_name']),
+          ('Email', order['email']),
+          ('Phone', order['phone']),
+          ('Delivery Method', order['delivery_method']),
+          ('Order Date', order['created_at'].strftime('%Y-%m-%d %H:%M') if order['created_at'] else 'N/A')
+        ] %}
+        <div>
+          <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">{{ label }}</div>
+          <div style="font-weight:500;">{{ val }}</div>
+        </div>
+        {% endfor %}
+        <div style="grid-column:1/-1;">
+          <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Address</div>
+          <div style="font-weight:500;">{{ order['address'] }}</div>
+        </div>
+        {% if order['notes'] %}
+        <div style="grid-column:1/-1;">
+          <div style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;">Notes</div>
+          <div style="font-weight:500;font-style:italic;">{{ order['notes'] }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="admin-table-wrap">
+      <div class="admin-table-header"><h3>Order Items</h3></div>
+      <table>
+        <thead>
+          <tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td><strong>{{ item['product_name'] }}</strong></td>
+            <td>Rs. {{ "%.2f"|format(item['price']) }}</td>
+            <td>{{ item['quantity'] }}</td>
+            <td><strong>Rs. {{ "%.2f"|format(item['price'] * item['quantity']) }}</strong></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" style="text-align:right;font-weight:700;padding:14px 20px;background:var(--bg);">Delivery Charge</td>
+            <td style="padding:14px 20px;background:var(--bg);">
+              {% if order['delivery_charge'] and order['delivery_charge'] > 0 %}Rs. {{ "%.2f"|format(order['delivery_charge']) }}{% else %}Free{% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align:right;font-weight:700;padding:14px 20px;background:var(--bg);">Total</td>
+            <td style="font-weight:800;font-size:1.1rem;color:var(--accent);padding:14px 20px;background:var(--bg);">Rs. {{ "%.2f"|format(order['total_price']) }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right: Status + Payment -->
+  <div class="no-print">
+    <div class="admin-table-wrap" style="padding:24px 28px;margin-bottom:20px;">
+      <h3 style="margin-bottom:16px;">Update Status</h3>
+      <div style="margin-bottom:16px;">
+        Current: <span class="badge badge-{{ order['status']|lower|replace(' ','_') }}">{{ order['status'] }}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px;">
+        {% for s, icon in [('Pending','⏳'),('Payment Received','💳'),('Processing','🖨️'),('Completed','✅')] %}
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--radius-sm);
+             background:{% if order['status'] == s %}var(--accent-light){% else %}var(--bg){% endif %};
+             border:1px solid {% if order['status'] == s %}var(--accent){% else %}var(--border){% endif %};">
+          <span>{{ icon }}</span>
+          <span style="font-size:13px;font-weight:{% if order['status'] == s %}700{% else %}400{% endif %};
+                color:{% if order['status'] == s %}var(--accent){% else %}var(--text-muted){% endif %};">{{ s }}</span>
+          {% if order['status'] == s %}<span style="margin-left:auto;font-size:11px;color:var(--accent);font-weight:700;">CURRENT</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <form action="{{ url_for('admin_update_order_status', order_id=order['id']) }}" method="POST">
+        <div class="form-group">
+          <label class="form-label">Change Status To</label>
+          <select name="status" class="form-control">
+            {% for s in ['Pending','Payment Received','Processing','Completed','Cancelled'] %}
+            <option value="{{ s }}" {% if order['status'] == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">💾 Update Status</button>
+      </form>
+    </div>
+
+    <div class="admin-table-wrap" style="padding:24px 28px;">
+      <h3 style="margin-bottom:16px;">Payment Screenshot</h3>
+      {% if order['payment_screenshot'] %}
+        <img src="{{ url_for('uploaded_payment', filename=order['payment_screenshot']) }}"
+             alt="Payment Screenshot"
+             style="width:100%;border-radius:var(--radius-sm);border:1px solid var(--border);">
+        <a href="{{ url_for('uploaded_payment', filename=order['payment_screenshot']) }}"
+           target="_blank" class="btn btn-secondary btn-full" style="margin-top:12px;">🔍 View Full Size</a>
+      {% else %}
+        <div style="text-align:center;padding:32px;color:var(--text-muted);">
+          <div style="font-size:2rem;margin-bottom:8px;">📷</div>
+          No screenshot uploaded.
+        </div>
+      {% endif %}
+    </div>
+
+    <div style="margin-top:16px;">
+      <a href="{{ url_for('admin_orders') }}" class="btn btn-secondary btn-full">← Back to Orders</a>
+    </div>
+  </div>
+
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed - PrintCraft 3D{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="success-page">
+    <div class="success-icon">✅</div>
+    <h1 style="margin-bottom:12px;">Order Confirmed!</h1>
+    <p style="font-size:16px;max-width:480px;margin:0 auto 32px;">
+      Thank you, <strong>{{ order['customer_name'] }}</strong>! Your order <strong>{{ order['order_code'] }}</strong> has been placed successfully. We'll review your payment and contact you shortly.
+    </p>
+
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px 36px;max-width:440px;margin:0 auto 40px;text-align:left;">
+      <h3 style="margin-bottom:16px;">Order Details</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:14px;">
+          <span style="color:var(--text-muted);">Order ID</span>
+          <strong>{{ order['order_code'] }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;">
+          <span style="color:var(--text-muted);">Email</span>
+          <strong>{{ order['email'] }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;">
+          <span style="color:var(--text-muted);">Delivery</span>
+          <strong>{{ order['delivery_method'] }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;">
+          <span style="color:var(--text-muted);">Total Paid</span>
+          <strong style="color:var(--accent);">Rs. {{ "%.2f"|format(order['total_price']) }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;">
+          <span style="color:var(--text-muted);">Status</span>
+          <span class="badge badge-pending">Pending Verification</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg">
+        🛍️ Continue Shopping
+      </a>
+      <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg">
+        🏠 Back to Home
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

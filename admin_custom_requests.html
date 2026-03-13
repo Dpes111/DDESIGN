@@ -1,0 +1,83 @@
+{% extends "admin_base.html" %}
+{% block title %}Custom Requests - Admin{% endblock %}
+{% block page_title %}Custom Print Requests{% endblock %}
+
+{% block content %}
+
+<div class="admin-table-wrap">
+  <div class="admin-table-header">
+    <h3>Custom Print Requests ({{ requests|length }})</h3>
+  </div>
+
+  {% if requests %}
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Customer</th>
+        <th>Description</th>
+        <th>Size</th>
+        <th>Qty</th>
+        <th>File</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Update</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for req in requests %}
+      <tr>
+        <td>{{ req['id'] }}</td>
+        <td>
+          <div style="font-weight:600;">{{ req['customer_name'] }}</div>
+          <div style="font-size:12px;color:var(--text-muted);">{{ req['email'] }}</div>
+          {% if req['phone'] %}
+          <div style="font-size:12px;color:var(--text-muted);">{{ req['phone'] }}</div>
+          {% endif %}
+        </td>
+        <td style="max-width:200px;">
+          <div style="font-size:13px;line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">
+            {{ req['description'] }}
+          </div>
+        </td>
+        <td style="font-size:13px;">{{ req['size'] or '—' }}</td>
+        <td style="font-weight:600;">{{ req['quantity'] }}</td>
+        <td>
+          {% if req['stl_file'] %}
+            <a href="{{ url_for('uploaded_stl', filename=req['stl_file']) }}"
+               class="btn btn-secondary btn-sm" target="_blank">📁 Download</a>
+          {% else %}
+            <span style="color:var(--text-muted);font-size:13px;">None</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="badge badge-{{ req['status']|lower }}">{{ req['status'] }}</span>
+        </td>
+        <td style="color:var(--text-muted);font-size:13px;">
+          {{ req['created_at'].strftime('%Y-%m-%d') if req['created_at'] else 'N/A' }}
+        </td>
+        <td>
+          <form action="{{ url_for('admin_update_request_status', req_id=req['id']) }}" method="POST">
+            <div style="display:flex;gap:6px;">
+              <select name="status" class="form-control" style="padding:6px 10px;font-size:12px;height:32px;">
+                {% for s in ['Pending','In Progress','Completed','Rejected'] %}
+                <option value="{{ s }}" {% if req['status'] == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn btn-primary btn-sm">✓</button>
+            </div>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div style="padding:60px;text-align:center;color:var(--text-muted);">
+    <div style="font-size:3rem;margin-bottom:12px;">✏️</div>
+    No custom print requests yet.
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

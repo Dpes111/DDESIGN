@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Shopping Cart - PrintCraft 3D{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ url_for('index') }}">Home</a>
+      <span class="breadcrumb-sep">›</span>
+      <span>Shopping Cart</span>
+    </div>
+    <h1>🛒 Shopping Cart</h1>
+    <p>{{ items|length }} item{% if items|length != 1 %}s{% endif %} in your cart</p>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:80px;">
+
+  {% if items %}
+  <div class="cart-layout">
+
+    <!-- Cart Items -->
+    <div>
+      {% for item in items %}
+      <div class="cart-item">
+        <div class="cart-item-img">
+          {% set emoji_map = {'Name Signs':'🏷️','Keychains':'🗝️','Decorative Models':'🗼','Functional Products':'🔧'} %}
+          <span style="font-size:2.2rem;">🖨️</span>
+        </div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">{{ item['name'] }}</div>
+          <div class="cart-item-price">Rs. {{ "%.2f"|format(item['price']) }} each</div>
+          <div style="color:var(--accent);font-weight:700;font-size:14px;margin-top:4px;">
+            Subtotal: Rs. {{ "%.2f"|format(item['subtotal']) }}
+          </div>
+        </div>
+        <div class="cart-item-actions">
+          <!-- Quantity update form -->
+          <form action="{{ url_for('update_cart', product_id=item['id']) }}" method="POST">
+            <div class="cart-qty-form">
+              <button type="button" class="cart-qty-btn" data-action="minus">−</button>
+              <input type="number" name="quantity" value="{{ item['quantity'] }}" min="0" class="cart-qty-input">
+              <button type="button" class="cart-qty-btn" data-action="plus">+</button>
+            </div>
+          </form>
+
+          <!-- Remove -->
+          <a href="{{ url_for('remove_from_cart', product_id=item['id']) }}"
+             class="btn-icon" title="Remove item" style="color:var(--danger);">
+            🗑️
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div style="margin-top:20px;">
+        <a href="{{ url_for('products') }}" class="btn btn-secondary">
+          ← Continue Shopping
+        </a>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div>
+      <div class="cart-summary">
+        <h3>Order Summary</h3>
+        {% for item in items %}
+        <div class="summary-row">
+          <span>{{ item['name'] }} × {{ item['quantity'] }}</span>
+          <span>Rs. {{ "%.2f"|format(item['subtotal']) }}</span>
+        </div>
+        {% endfor %}
+        <div class="summary-total">
+          <span>Total</span>
+          <span style="color:var(--accent);">Rs. {{ "%.2f"|format(total) }}</span>
+        </div>
+        <a href="{{ url_for('checkout') }}" class="btn btn-primary btn-full btn-lg" style="margin-top:20px;">
+          Proceed to Checkout →
+        </a>
+        <p style="font-size:12px;text-align:center;margin-top:12px;color:var(--text-muted);">
+          🔒 Secure checkout via eSewa / Khalti / Bank QR
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  {% else %}
+
+  <div class="empty-state">
+    <div class="empty-state-icon">🛒</div>
+    <h3>Your cart is empty</h3>
+    <p>Looks like you haven't added anything yet.</p>
+    <a href="{{ url_for('products') }}" class="btn btn-primary btn-lg mt-6">
+      🛍️ Browse Products
+    </a>
+  </div>
+
+  {% endif %}
+</div>
+{% endblock %}

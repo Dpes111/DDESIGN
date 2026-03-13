@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Admin - PrintCraft 3D{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-brand">
+      <div class="brand-name">🖨️ D Design</div>
+      <div class="brand-sub">Admin Panel</div>
+    </div>
+
+    <nav class="admin-nav">
+      <div class="admin-nav-label">Main</div>
+      <a href="{{ url_for('admin_dashboard') }}" class="admin-nav-item">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+
+      <div class="admin-nav-label">Catalog</div>
+      <a href="{{ url_for('admin_products') }}" class="admin-nav-item">
+        <span class="nav-icon">📦</span> Products
+      </a>
+      <a href="{{ url_for('admin_add_product') }}" class="admin-nav-item">
+        <span class="nav-icon">➕</span> Add Product
+      </a>
+
+      <div class="admin-nav-label">Orders</div>
+      <a href="{{ url_for('admin_orders') }}" class="admin-nav-item">
+        <span class="nav-icon">🛒</span> All Orders
+      </a>
+      <a href="{{ url_for('admin_orders', status='Pending') }}" class="admin-nav-item">
+        <span class="nav-icon">⏳</span> Pending
+      </a>
+      <a href="{{ url_for('admin_custom_requests') }}" class="admin-nav-item">
+        <span class="nav-icon">✏️</span> Custom Requests
+      </a>
+
+      <div class="admin-nav-label">Site</div>
+      <a href="{{ url_for('index') }}" class="admin-nav-item" target="_blank">
+        <span class="nav-icon">🌐</span> View Store
+      </a>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <a href="{{ url_for('admin_logout') }}" class="admin-nav-item" style="color:rgba(255,100,100,.8);">
+        <span class="nav-icon">🚪</span> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:14px;color:var(--text-muted);">
+          👤 {{ session.get('admin_username', 'Admin') }}
+        </span>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary btn-sm">Logout</a>
+      </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div style="position:relative;">
+      <div class="flash-container" style="position:fixed;top:80px;right:20px;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">
+              {% if category == 'success' %}✅{% elif category == 'error' %}❌{% elif category == 'info' %}ℹ️{% else %}⚠️{% endif %}
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endwith %}
+      </div>
+    </div>
+
+    <div class="admin-content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
