@@ -365,6 +365,13 @@
    .hero-img-card:nth-child(3) { background: linear-gradient(135deg, #fff8f2, #fecba0); }
    .hero-img-card:nth-child(4) { margin-top: -24px; background: linear-gradient(135deg, #fdf0e0, #fcd9a8); }
    .hero-img-card:hover { transform: scale(1.04); }
+.hero-img-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
    
    /* ── Section Headers ── */
    .section { padding: 80px 0; }
