@@ -43,8 +43,8 @@
         <td style="font-size:13px;">{{ req['size'] or '—' }}</td>
         <td style="font-weight:600;">{{ req['quantity'] }}</td>
         <td>
-          {% if req['stl_file'] %}
-            <a href="{{ url_for('uploaded_stl', filename=req['stl_file']) }}"
+          {% if req['stl_url'] %}
+            <a href="{{ req['stl_url'] }}"
                class="btn btn-secondary btn-sm" target="_blank">📁 Download</a>
           {% else %}
             <span style="color:var(--text-muted);font-size:13px;">None</span>
