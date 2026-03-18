@@ -25,9 +25,14 @@
       <div class="product-detail-img">
         {% set emoji_map = {'Name Signs':'🏷️','Keychains':'🗝️','Decorative Models':'🗼','Functional Products':'🔧'} %}
         {% if product['image'] and product['image'] != 'default.png' %}
-          <img src="{{ url_for('static', filename='images/products/' + product['image']) }}"
-               alt="{{ product['name'] }}"
-               onerror="this.outerHTML='<span style=font-size:6rem>{{ emoji_map.get(product['category'],'🖨️') }}</span>'">
+          {% if product['image'].startswith('http') %}
+            <img src="{{ product['image'] }}" alt="{{ product['name'] }}"
+                 onerror="this.style.display='none'">
+          {% else %}
+            <img src="{{ url_for('static', filename='images/products/' + product['image']) }}"
+                 alt="{{ product['name'] }}"
+                 onerror="this.style.display='none'">
+          {% endif %}
         {% else %}
           <span style="font-size:6rem;">{{ emoji_map.get(product['category'], '🖨️') }}</span>
         {% endif %}
