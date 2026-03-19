@@ -127,8 +127,51 @@
     <div style="margin-top:16px;">
       <a href="{{ url_for('admin_orders') }}" class="btn btn-secondary btn-full">← Back to Orders</a>
     </div>
+
+    <div style="margin-top:12px;">
+      <button onclick="document.getElementById('deleteModal').style.display='flex'"
+              class="btn btn-danger btn-full">
+        🗑️ Delete This Order
+      </button>
+    </div>
   </div>
 
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+     z-index:999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:white;border-radius:var(--radius-lg);padding:32px;max-width:420px;
+              width:100%;box-shadow:var(--shadow-lg);">
+    <h3 style="margin-bottom:8px;color:var(--danger);">⚠️ Delete Order</h3>
+    <p style="font-size:14px;color:var(--text-secondary);margin-bottom:20px;">
+      This will permanently delete order <strong>{{ order['order_code'] }}</strong> including:
+    </p>
+    <ul style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;padding-left:20px;">
+      <li>Order record and all items</li>
+      <li>Payment screenshot from storage</li>
+      <li>All associated files</li>
+    </ul>
+    <p style="font-size:13px;color:var(--danger);font-weight:600;margin-bottom:20px;">
+      This cannot be undone.
+    </p>
+    <form action="{{ url_for('admin_delete_order', order_id=order['id']) }}" method="POST">
+      <div class="form-group">
+        <label class="form-label">Enter your admin password to confirm</label>
+        <input type="password" name="confirm_password" class="form-control"
+               placeholder="Your admin password" required>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button type="submit" class="btn btn-danger" style="flex:1;">
+          🗑️ Delete Permanently
+        </button>
+        <button type="button" class="btn btn-secondary"
+                onclick="document.getElementById('deleteModal').style.display='none'">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
 
 
