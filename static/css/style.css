@@ -1221,7 +1221,10 @@ tbody tr:hover td { background: var(--bg); }
 
 @media (max-width: 768px) {
   .hero-inner { grid-template-columns: 1fr; }
-  .hero-visual { display: none; }
+  .hero-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 28px; }
+  .hero-img-card { aspect-ratio: 1; }
+  .hero-img-card:nth-child(1) { margin-top: 0; }
+  .hero-img-card:nth-child(4) { margin-top: 0; }
   .hero { padding: 60px 0 50px; }
   .products-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
   .categories-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1328,7 +1331,9 @@ tbody tr:hover td { background: var(--bg); }
   /* ── Hero ── */
   .hero { padding: 48px 0 40px; }
   .hero-inner { grid-template-columns: 1fr; gap: 0; }
-  .hero-visual { display: none; }
+  .hero-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 28px; }
+  .hero-img-card:nth-child(1) { margin-top: 0; }
+  .hero-img-card:nth-child(4) { margin-top: 0; }
   .hero-badge { font-size: 12px; }
   .hero-desc { font-size: 15px; margin-bottom: 28px; }
   .hero-actions { flex-direction: column; gap: 10px; }
