@@ -483,23 +483,95 @@ function setFileInput(file) {
   reader.readAsDataURL(file);
 }
 
-// Form validation — screenshot is mandatory
+// Helper: show inline error under a field
+function showFieldError(input, message) {
+  clearFieldError(input);
+  input.style.borderColor = '#e53e3e';
+  input.style.background = '#fef2f2';
+  const err = document.createElement('div');
+  err.className = 'inline-field-error';
+  err.style.cssText = 'color:#dc2626;font-size:12.5px;margin-top:5px;font-weight:500;display:flex;align-items:center;gap:5px;';
+  err.innerHTML = '<span style="font-size:14px;">⚠</span> ' + message;
+  input.parentNode.appendChild(err);
+}
+
+function clearFieldError(input) {
+  input.style.borderColor = '';
+  input.style.background = '';
+  const prev = input.parentNode.querySelector('.inline-field-error');
+  if (prev) prev.remove();
+}
+
+// Clear error styling on input
+['name','phone','address'].forEach(n => {
+  const el = document.querySelector('[name="' + n + '"]');
+  if (el) el.addEventListener('input', () => clearFieldError(el));
+});
+
+// Step-by-step validation on submit
 document.getElementById('checkout-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  // Clear all previous errors
+  document.querySelectorAll('.inline-field-error').forEach(el => el.remove());
+  document.querySelectorAll('.form-control').forEach(el => {
+    el.style.borderColor = ''; el.style.background = '';
+  });
+  document.getElementById('screenshot-error').style.display = 'none';
+
+  // --- Step 1: Check name ---
+  const nameEl = document.querySelector('[name="name"]');
+  if (!nameEl.value.trim()) {
+    showFieldError(nameEl, 'Please enter your full name.');
+    nameEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    nameEl.focus();
+    return;
+  }
+
+  // --- Step 2: Check phone ---
+  const phoneEl = document.querySelector('[name="phone"]');
+  if (!phoneEl.value.trim()) {
+    showFieldError(phoneEl, 'Please enter your phone number.');
+    phoneEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    phoneEl.focus();
+    return;
+  }
+  if (!/^[0-9+\s\-]{7,15}$/.test(phoneEl.value.trim())) {
+    showFieldError(phoneEl, 'Please enter a valid phone number.');
+    phoneEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    phoneEl.focus();
+    return;
+  }
+
+  // --- Step 3: Check address ---
+  const addrEl = document.querySelector('[name="address"]');
+  if (!addrEl.value.trim()) {
+    showFieldError(addrEl, 'Please enter your delivery address.');
+    addrEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    addrEl.focus();
+    return;
+  }
+
+  // --- Step 4: Delivery is always selected (radio has default), skip ---
+
+  // --- Step 5: Payment screenshot ---
   const inp = document.getElementById('screenshot-input');
   if (!inp.files || inp.files.length === 0) {
-    e.preventDefault();
-    const errEl = document.getElementById('screenshot-error');
-    errEl.style.display = 'block';
+    document.getElementById('screenshot-error').style.display = 'block';
+    document.getElementById('upload-zone').style.borderColor = '#e53e3e';
+    document.getElementById('upload-zone').style.background = '#fef2f2';
     document.getElementById('section-payment').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return false;
+    return;
   }
-  // Disable buttons to prevent double-submit
+
+  // All good — disable buttons and submit
   ['place-btn-top', 'place-btn-bottom'].forEach(id => {
     const b = document.getElementById(id);
     if (b) { b.disabled = true; b.innerHTML = '⏳ Placing Order...'; }
   });
   const mob = document.querySelector('.mobile-place-order-bar button');
   if (mob) { mob.disabled = true; mob.innerHTML = '⏳ Please wait...'; }
+  this.submit();
 });
 
 function mobileSubmit() {
