@@ -606,7 +606,59 @@ def checkout():
     return render_template("checkout.html", items=items, subtotal=subtotal, delivery_options=DELIVERY_OPTIONS)
 
 
-@app.route("/order-success/<int:order_id>")
+@app.route("/track-order")
+def track_order():
+    query = request.args.get("q", "").strip()
+    if not query:
+        return render_template("track_order.html", query=None, orders=None, error_type=None)
+
+    db = get_db()
+
+    # Determine search type and fetch matching orders
+    if query.upper().startswith("PC-"):
+        # Search by order code
+        if USE_POSTGRES:
+            cur = db.cursor()
+            cur.execute("SELECT * FROM orders WHERE UPPER(order_code) = %s", (query.upper(),))
+            orders = cur.fetchall()
+        else:
+            orders = db.execute("SELECT * FROM orders WHERE UPPER(order_code) = ?", (query.upper(),)).fetchall()
+    elif "@" in query:
+        # Search by email
+        if USE_POSTGRES:
+            cur = db.cursor()
+            cur.execute("SELECT * FROM orders WHERE LOWER(email) = %s ORDER BY created_at DESC", (query.lower(),))
+            orders = cur.fetchall()
+        else:
+            orders = db.execute("SELECT * FROM orders WHERE LOWER(email) = ? ORDER BY created_at DESC", (query.lower(),)).fetchall()
+    else:
+        # Search by phone
+        clean = query.replace(" ", "").replace("-", "")
+        if USE_POSTGRES:
+            cur = db.cursor()
+            cur.execute("SELECT * FROM orders WHERE REPLACE(REPLACE(phone, ' ', ''), '-', '') = %s ORDER BY created_at DESC", (clean,))
+            orders = cur.fetchall()
+        else:
+            orders = db.execute("SELECT * FROM orders WHERE REPLACE(REPLACE(phone, ' ', ''), '-', '') = ? ORDER BY created_at DESC", (clean,)).fetchall()
+
+    if not orders:
+        return render_template("track_order.html", query=query, orders=None, error_type="not_found")
+
+    orders = [dict(o) for o in orders]
+
+    # Check if all orders are delivered or cancelled — show specific error
+    statuses = [o["status"] for o in orders]
+    if all(s == "Delivered" for s in statuses):
+        return render_template("track_order.html", query=query, orders=orders, error_type="delivered")
+    if all(s == "Cancelled" for s in statuses):
+        return render_template("track_order.html", query=query, orders=orders, error_type="cancelled")
+
+    # Filter out delivered/cancelled from main list, show active ones
+    active = [o for o in orders if o["status"] not in ("Delivered", "Cancelled")]
+    return render_template("track_order.html", query=query, orders=active or orders, error_type=None)
+
+
+
 def order_success(order_id):
     db = get_db()
     if USE_POSTGRES:
