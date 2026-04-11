@@ -18,7 +18,9 @@ from werkzeug.utils import secure_filename
 # App configuration
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "3dprint-secret-key-change-in-production")
+app.secret_key = os.environ.get("SECRET_KEY")
+if not app.secret_key:
+    raise RuntimeError("SECRET_KEY environment variable is not set. Add it to your .env or hosting config.")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -37,9 +39,9 @@ for folder in [STL_FOLDER, PAYMENT_FOLDER, PRODUCT_IMAGE_FOLDER]:
 # ---------------------------------------------------------------------------
 # Supabase config
 # ---------------------------------------------------------------------------
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://postgres.bpklpcrbzbmiopfcwcfy:MySecurePass12@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres")
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://bpklpcrbzbmiopfcwcfy.supabase.co")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_secret_YKRk3EuR-bi6IMx-WH5CLw_KH9W4zj2")
+DATABASE_URL = os.environ.get("DATABASE_URL")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 # ---------------------------------------------------------------------------
 # Database setup
