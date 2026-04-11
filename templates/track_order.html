@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+{% block title %}Track Your Order - PrintCraft 3D{% endblock %}
+
+{% block head %}
+<style>
+.track-hero {
+  background: linear-gradient(135deg, #fff8f2 0%, #fffaf7 50%, #fff5ee 100%);
+  padding: 60px 0 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.track-hero::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(249,115,22,.07) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.track-search-box {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 36px;
+  max-width: 560px;
+  margin: 0 auto;
+  box-shadow: var(--shadow);
+}
+.track-input-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.track-input-group .form-control {
+  flex: 1;
+  font-size: 15px;
+}
+@media (max-width: 480px) {
+  .track-input-group { flex-direction: column; }
+  .track-search-box { padding: 24px 18px; }
+}
+
+/* ── Result card ── */
+.track-result {
+  max-width: 640px;
+  margin: 36px auto 60px;
+}
+.track-result-header {
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 24px 28px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.track-order-code {
+  font-family: monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+}
+.track-result-body {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding: 28px;
+}
+
+/* ── Timeline ── */
+.timeline {
+  position: relative;
+  padding: 8px 0;
+  margin: 24px 0;
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 19px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: var(--border);
+}
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  position: relative;
+  margin-bottom: 28px;
+}
+.timeline-item:last-child { margin-bottom: 0; }
+.timeline-dot {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  transition: all 0.3s;
+}
+.timeline-item.done .timeline-dot {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+.timeline-item.active .timeline-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(249,115,22,0.15);
+}
+.timeline-item.cancelled .timeline-dot {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+}
+.timeline-content { padding-top: 8px; flex: 1; }
+.timeline-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.timeline-item.inactive .timeline-title { color: var(--text-muted); font-weight: 400; }
+.timeline-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.timeline-item.active .timeline-title { color: var(--accent); }
+.timeline-item.done .timeline-title { color: var(--success); }
+.timeline-item.cancelled .timeline-title { color: var(--danger); }
+
+/* ── Info grid ── */
+.track-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 480px) { .track-info-grid { grid-template-columns: 1fr; } }
+.track-info-item { }
+.track-info-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 3px;
+}
+.track-info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ── Error card ── */
+.track-error {
+  max-width: 560px;
+  margin: 36px auto 60px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  text-align: center;
+}
+.track-error-icon { font-size: 3rem; margin-bottom: 16px; }
+.track-error-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.track-error-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.track-error-suggestions {
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  text-align: left;
+  margin-bottom: 24px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+.track-error-suggestions li { margin-bottom: 6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="track-hero">
+  <div class="container">
+    <div style="font-size:2.5rem;margin-bottom:12px;">📦</div>
+    <h1 style="margin-bottom:10px;">Track Your Order</h1>
+    <p style="color:var(--text-secondary);font-size:16px;margin-bottom:32px;max-width:420px;margin-left:auto;margin-right:auto;">
+      Enter your Order ID, phone number, or email to see the live status of your order.
+    </p>
+
+    <div class="track-search-box">
+      <form method="GET" action="{{ url_for('track_order') }}" id="track-form">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-size:15px;font-weight:600;">Order ID / Phone Number / Email</label>
+          <div class="track-input-group">
+            <input type="text" name="q" class="form-control"
+                   placeholder="e.g. PC-AB12CD or 98XXXXXXXX"
+                   value="{{ query or '' }}"
+                   required
+                   autocomplete="off"
+                   style="font-size:15px;">
+            <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+              🔍 Track
+            </button>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:20px;flex-wrap:wrap;">
+            <span style="font-size:12px;color:var(--text-muted);">✅ Order ID (e.g. PC-AB12CD)</span>
+            <span style="font-size:12px;color:var(--text-muted);">📞 Phone number</span>
+            <span style="font-size:12px;color:var(--text-muted);">📧 Email address</span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if query %}
+<div class="container">
+
+  {% if error_type == 'not_found' %}
+  <div class="track-error">
+    <div class="track-error-icon">🔍</div>
+    <div class="track-error-title">No Order Found</div>
+    <div class="track-error-desc">
+      We couldn't find any order matching <strong>"{{ query }}"</strong>.
+    </div>
+    <div class="track-error-suggestions">
+      <strong style="font-size:13px;color:var(--text-primary);">Please check the following:</strong>
+      <ul style="margin:10px 0 0 16px;">
+        <li>Make sure the Order ID is correct — it looks like <strong>PC-XXXXXX</strong></li>
+        <li>Try with the phone number you used when placing the order</li>
+        <li>Try with the email address you entered at checkout</li>
+        <li>Order IDs are case-sensitive — check for capital letters</li>
+      </ul>
+    </div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+      Haven't placed an order yet? You'll get an Order ID on the confirmation page after checkout.
+    </p>
+    <a href="https://wa.me/9779829132645" target="_blank" class="btn btn-primary">
+      💬 Contact Us on WhatsApp
+    </a>
+  </div>
+
+  {% elif error_type == 'delivered' %}
+  <div class="track-error">
+    <div class="track-error-icon">✅</div>
+    <div class="track-error-title">Order Already Delivered</div>
+    <div class="track-error-desc">
+      Your order <strong>{{ orders[0]['order_code'] }}</strong> has been delivered and marked as complete.
+      If you haven't received it or have an issue, please contact us.
+    </div>
+    <a href="https://wa.me/9779829132645" target="_blank" class="btn btn-primary" style="margin-right:10px;">
+      💬 Contact Us
+    </a>
+    <a href="{{ url_for('track_order') }}" class="btn btn-secondary">🔄 Track Another</a>
+  </div>
+
+  {% elif error_type == 'cancelled' %}
+  <div class="track-error">
+    <div class="track-error-icon">❌</div>
+    <div class="track-error-title">Order Was Cancelled</div>
+    <div class="track-error-desc">
+      Your order <strong>{{ orders[0]['order_code'] }}</strong> has been cancelled.
+      If you believe this is a mistake or need help, please reach out to us directly.
+    </div>
+    <a href="https://wa.me/9779829132645" target="_blank" class="btn btn-primary" style="margin-right:10px;">
+      💬 Contact Us
+    </a>
+    <a href="{{ url_for('products') }}" class="btn btn-secondary">🛍️ Shop Again</a>
+  </div>
+
+  {% elif orders %}
+  {% for order in orders %}
+
+  {% set status = order['status'] %}
+  {% set all_statuses = ['Pending', 'Payment Received', 'Confirmed', 'Printing', 'Quality Check', 'Ready for Pickup / Dispatch', 'Out for Delivery', 'Delivered'] %}
+  {% set status_index = all_statuses.index(status) if status in all_statuses else -1 %}
+
+  <div class="track-result">
+    <div class="track-result-header">
+      <div>
+        <div style="font-size:12px;opacity:.8;margin-bottom:4px;">Order ID</div>
+        <div class="track-order-code">{{ order['order_code'] }}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;opacity:.8;margin-bottom:4px;">Current Status</div>
+        <div style="background:rgba(255,255,255,0.2);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;">
+          {{ status }}
+        </div>
+      </div>
+    </div>
+
+    <div class="track-result-body">
+
+      <!-- Timeline -->
+      <h3 style="margin-bottom:4px;font-size:15px;">Order Progress</h3>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">Live tracking of your order from placement to delivery.</p>
+
+      <div class="timeline">
+        {% set timeline_steps = [
+          ('Pending',                      '⏳', 'Order Placed',             'We received your order and are verifying payment.'),
+          ('Payment Received',             '💳', 'Payment Verified',         'Your payment has been confirmed by our team.'),
+          ('Confirmed',                    '✅', 'Order Confirmed',          'Your order is confirmed and queued for printing.'),
+          ('Printing',                     '🖨️', 'Printing in Progress',     'Your item is currently being 3D printed.'),
+          ('Quality Check',                '🔍', 'Quality Check',            'Checking the print quality before dispatch.'),
+          ('Ready for Pickup / Dispatch',  '📦', 'Ready / Dispatched',       'Your order is packed and ready or has been dispatched.'),
+          ('Out for Delivery',             '🚚', 'Out for Delivery',         'Your package is on its way to you.'),
+          ('Delivered',                    '🎉', 'Delivered',                'Your order has been delivered. Enjoy!')
+        ] %}
+        {% for step_status, icon, title, desc in timeline_steps %}
+          {% set step_idx = loop.index0 %}
+          {% if step_idx < status_index %}
+            {% set state = 'done' %}
+          {% elif step_idx == status_index %}
+            {% set state = 'active' %}
+          {% else %}
+            {% set state = 'inactive' %}
+          {% endif %}
+        <div class="timeline-item {{ state }}">
+          <div class="timeline-dot">
+            {% if state == 'done' %}✓{% else %}{{ icon }}{% endif %}
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-title">{{ title }}</div>
+            <div class="timeline-desc">{{ desc }}</div>
+            {% if state == 'active' %}
+            <div style="margin-top:5px;font-size:12px;background:var(--accent-light);color:var(--accent);display:inline-block;padding:2px 10px;border-radius:999px;font-weight:700;">● Live now</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Order info -->
+      <div class="track-info-grid">
+        <div class="track-info-item">
+          <div class="track-info-label">Customer</div>
+          <div class="track-info-value">{{ order['customer_name'] }}</div>
+        </div>
+        <div class="track-info-item">
+          <div class="track-info-label">Phone</div>
+          <div class="track-info-value">{{ order['phone'] }}</div>
+        </div>
+        <div class="track-info-item">
+          <div class="track-info-label">Delivery</div>
+          <div class="track-info-value">{{ order['delivery_method'].split('(')[0].strip() }}</div>
+        </div>
+        <div class="track-info-item">
+          <div class="track-info-label">Total Paid</div>
+          <div class="track-info-value" style="color:var(--accent);">Rs. {{ "%.2f"|format(order['total_price']) }}</div>
+        </div>
+        <div class="track-info-item" style="grid-column:1/-1;">
+          <div class="track-info-label">Placed On</div>
+          <div class="track-info-value">{{ order['created_at'].strftime('%B %d, %Y at %I:%M %p') if order['created_at'] else 'N/A' }}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="https://wa.me/9779829132645" target="_blank" class="btn btn-secondary">
+          💬 Contact Us
+        </a>
+        <a href="{{ url_for('track_order') }}" class="btn btn-secondary">
+          🔄 Track Another Order
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {% endfor %}
+  {% endif %}
+
+</div>
+{% endif %}
+
+{% endblock %}
