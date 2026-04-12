@@ -661,6 +661,7 @@ def track_order():
 
 
 
+@app.route("/order-success/<int:order_id>")
 def order_success(order_id):
     db = get_db()
     if USE_POSTGRES:
