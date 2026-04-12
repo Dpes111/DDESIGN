@@ -1593,59 +1593,83 @@ tbody tr:hover td { background: var(--bg); }
   }
 }
 
-/* ── Mobile Bottom Cart Bar ── */
-.mobile-bottom-cart {
+/* ── Mobile Bottom Bar ── */
+.mobile-bottom-bar {
   display: none;
+}
+.mobile-bottom-btn {
+  text-decoration: none;
 }
 
 @media (max-width: 768px) {
-  /* Show bottom cart bar */
-  .mobile-bottom-cart {
+  .mobile-bottom-bar {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 200;
-    background: var(--accent);
-    color: white;
-    padding: 14px 24px;
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 16px;
-    text-decoration: none;
-    box-shadow: 0 -4px 20px rgba(249,115,22,.3);
-    transition: background var(--transition);
+    box-shadow: 0 -4px 20px rgba(0,0,0,.12);
+    border-top: 1px solid var(--border);
   }
-  .mobile-bottom-cart:hover {
+  .mobile-bottom-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: white;
+    text-decoration: none;
+    transition: background var(--transition), color var(--transition);
+    position: relative;
+  }
+  .mobile-bottom-btn span:first-child {
+    font-size: 20px;
+  }
+  .mobile-bottom-btn:hover {
+    background: var(--bg);
+    color: var(--accent);
+  }
+  .mobile-bottom-btn.mobile-bottom-cart {
+    color: white;
+    background: var(--accent);
+  }
+  .mobile-bottom-btn.mobile-bottom-cart:hover {
     background: var(--accent-hover);
   }
   .mobile-bottom-cart-badge {
+    position: absolute;
+    top: 6px;
+    right: calc(50% - 18px);
     background: white;
     color: var(--accent);
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
-    min-width: 22px;
-    height: 22px;
+    min-width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 6px;
+    padding: 0 4px;
+    border: 1.5px solid var(--accent);
   }
 
-  /* Add padding to body so content doesn't hide behind bottom bar */
+  /* Body padding so content doesn't hide behind bottom bar */
   body {
-    padding-bottom: 60px;
+    padding-bottom: 64px;
   }
 
   /* Hide the mobile cart from navbar since we have bottom bar */
   .mobile-cart-btn { display: none !important; }
 
-  /* WhatsApp button sits above the cart bar */
+  /* WhatsApp button sits above the bottom bar */
   .whatsapp-float {
     bottom: 72px !important;
   }
